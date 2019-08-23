@@ -177,10 +177,10 @@ public class RNStoryShareModule extends ReactContextBaseJavaModule {
 
       if(backgroundFile != null){
         Uri backgroundImageUri = FileProvider.getUriForFile(activity, providerName, backgroundFile);
-        if(backgroundContentType.equals('video'){
+        if(backgroundContentType.equals("video")){
             intent.setDataAndType(backgroundImageUri, MEDIA_TYPE_VIDEO);
         }
-        if(backgroundContentType.equals('image'){
+        if(backgroundContentType.equals("image")){
             intent.setDataAndType(backgroundImageUri, MEDIA_TYPE_IMAGE);
         }
         }
