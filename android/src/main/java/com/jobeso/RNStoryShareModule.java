@@ -237,7 +237,7 @@ public class RNStoryShareModule extends ReactContextBaseJavaModule {
 
       File backgroundFile = null;
       File stickerFile = null;
-      String backgroundContentType = '';
+      String backgroundContentType = null;
 
       switch(type){
         case BASE64: {
