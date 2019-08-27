@@ -8,7 +8,6 @@
 
 import Foundation
 import UIKit
-import SCSDKCreativeKit
 
 @objc(RNStoryShare)
 class RNStoryShare: NSObject{
@@ -120,86 +119,6 @@ class RNStoryShare: NSObject{
                               resolve: resolve,
                               reject: reject)
     
-        } catch {
-            reject(domain, error.localizedDescription, error)
-        }
-    }
-    
-
-    
-    func _shareToSnapchat(_ snap: SCSDKSnapContent,
-                              stickerAsset: URL? = nil,
-                              attributionLink: String,
-                              type: String,
-                              resolve: @escaping RCTPromiseResolveBlock,
-                              reject: RCTPromiseRejectBlock)
-    {
-        do {
-            if(attributionLink != ""){
-                snap.attachmentUrl = attributionLink
-            }
-            
-            if(stickerAsset != nil){
-                let sticker: SCSDKSnapSticker
-                
-                if(type == BASE64){
-                    let data = try Data(contentsOf: stickerAsset!,
-                                        options: NSData.ReadingOptions(rawValue: 0))
-                    let stickerImage = UIImage(data: data)
-                    
-                    sticker = SCSDKSnapSticker(stickerImage: stickerImage!)
-                } else {
-                    sticker = SCSDKSnapSticker(stickerUrl: stickerAsset!, isAnimated: false)
-                }
-
-                snap.sticker = sticker
-            }
-
-            let snapAPI = SCSDKSnapAPI(content: snap)
-            snapAPI.startSnapping {(error: Error?) in
-                resolve("ok")
-            }
-        } catch {
-            reject(domain, error.localizedDescription, error)
-        }
-    }
-    
-    @objc
-    func shareToSnapchat(_ config: NSDictionary,
-                         resolver resolve: @escaping RCTPromiseResolveBlock,
-                          rejecter reject: RCTPromiseRejectBlock) -> Void {
-        do {
-            if (config["backgroundAsset"] == nil && config["stickerAsset"] == nil){
-                let error = NSError(domain: domain, code: 400, userInfo: ["Error": "Background Asset and Sticker Asset are nil"])
-                return reject("No Assets", "Background Asset and Sticker Asset are nil", error)
-            }
-
-            let backgroundAsset = RCTConvert.nsurl(config["backgroundAsset"])
-            let stickerAsset = RCTConvert.nsurl(config["stickerAsset"])
-            let attributionLink: String = RCTConvert.nsString(config["attributionLink"]) ?? ""
-            let type: String = RCTConvert.nsString(config["type"] ?? FILE)
-            
-            let snap: SCSDKSnapContent
-            
-            if(backgroundAsset != nil) {
-                let photo: SCSDKSnapPhoto
-                
-                if(type == BASE64){
-                    let data = try Data(contentsOf: backgroundAsset!,
-                                        options: NSData.ReadingOptions(rawValue: 0))
-                    
-                    let snapImage = UIImage(data: data)
-                    photo = SCSDKSnapPhoto(image: snapImage!)
-                } else {
-                    photo = SCSDKSnapPhoto(imageUrl: backgroundAsset!)
-                }
-                
-                snap = SCSDKPhotoSnapContent(snapPhoto: photo)
-            }else{
-                snap = SCSDKNoSnapContent()
-            }
-            
-            _shareToSnapchat(snap,stickerAsset: stickerAsset, attributionLink: attributionLink, type: type, resolve: resolve, reject: reject)
         } catch {
             reject(domain, error.localizedDescription, error)
         }
