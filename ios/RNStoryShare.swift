@@ -14,9 +14,9 @@ class RNStoryShare: NSObject{
     let domain: String = "RNStoryShare"
     let FILE: String = "file"
     let BASE64: String = "base64"
-
+    
     let UNKNOWN_ERROR: String = "An unknown error occured in RNStoryShare"
-
+    
     let instagramScheme = URL(string: "instagram-stories://share")
     let snapchatScheme = URL(string: "snapchat://")
     
@@ -58,7 +58,7 @@ class RNStoryShare: NSObject{
                 }
                 
                 if(backgroundVideo != nil){
-                    pasteboardItems["com.facebook.sharedSticker.backgroundVideo"] = backgroundVideo!
+                    pasteboardItems["com.instagram.sharedSticker.backgroundVideo"] = backgroundVideo!
                 }
                 
                 if(stickerData != nil){
@@ -80,19 +80,19 @@ class RNStoryShare: NSObject{
             reject(domain, error.localizedDescription, error)
         }
     }
-
-
+    
+    
     @objc
     func shareToInstagram(_ config: NSDictionary,
-               resolver resolve: RCTPromiseResolveBlock,
-               rejecter reject: RCTPromiseRejectBlock) -> Void {
+                          resolver resolve: RCTPromiseResolveBlock,
+                          rejecter reject: RCTPromiseRejectBlock) -> Void {
         
         do {
             if (config["backgroundAsset"] == nil && config["stickerAsset"] == nil){
                 let error = NSError(domain: domain, code: 400, userInfo: ["Error": "Background Asset and Sticker Asset are nil"])
                 return reject("No Assets", "Background Asset and Sticker Asset are nil", error)
             }
-
+            
             let backgroundAsset = RCTConvert.nsurl(config["backgroundAsset"])
             let backgroundVideoAsset = RCTConvert.nsurl(config["backgroundVideo"])
             let backgroundBottomColor = RCTConvert.nsString(config["backgroundBottomColor"]) ?? ""
@@ -103,17 +103,16 @@ class RNStoryShare: NSObject{
             var backgroundData: NSData? = nil
             var backgroundVideo: NSData? = nil
             var stickerData:NSData? = nil
-
+            
             if(backgroundAsset != nil){
                 let decodedData = try Data(contentsOf: backgroundAsset!,
                                            options: NSData.ReadingOptions(rawValue: 0))
                 
                 backgroundData = UIImage(data: decodedData)!.pngData()! as NSData
             }
-
+            
             if(backgroundVideo != nil){
-                backgroundVideo = try Data(contentsOf: backgroundVideo!,
-                                           options: NSData.ReadingOptions(rawValue: 0))
+                backgroundVideo = try Data(contentsOf: backgroundVideoAsset!, options: NSData.ReadingOptions(rawValue: 0)) as NSData
             }
             
             if(stickerAsset != nil){
@@ -122,7 +121,7 @@ class RNStoryShare: NSObject{
                 
                 stickerData = UIImage(data: decodedStickerData)!.pngData()! as NSData
             }
-
+            
             _shareToInstagram(backgroundData,
                               backgroundVideo: backgroundVideo,
                               stickerData: stickerData,
@@ -131,7 +130,7 @@ class RNStoryShare: NSObject{
                               backgroundTopColor: backgroundTopColor,
                               resolve: resolve,
                               reject: reject)
-    
+            
         } catch {
             reject(domain, error.localizedDescription, error)
         }
