@@ -41,6 +41,7 @@ class RNStoryShare: NSObject{
     }
     
     func _shareToInstagram(_ backgroundData: NSData? = nil,
+                           backgroundVideo: NSData? = nil,
                            stickerData: NSData? = nil,
                            attributionLink: String,
                            backgroundBottomColor: String,
@@ -54,6 +55,10 @@ class RNStoryShare: NSObject{
                 
                 if(backgroundData != nil){
                     pasteboardItems["com.instagram.sharedSticker.backgroundImage"] = backgroundData!
+                }
+                
+                if(backgroundVideo != nil){
+                    pasteboardItems["com.facebook.sharedSticker.backgroundVideo"] = backgroundVideo!
                 }
                 
                 if(stickerData != nil){
@@ -89,12 +94,14 @@ class RNStoryShare: NSObject{
             }
 
             let backgroundAsset = RCTConvert.nsurl(config["backgroundAsset"])
+            let backgroundVideoAsset = RCTConvert.nsurl(config["backgroundVideo"])
             let backgroundBottomColor = RCTConvert.nsString(config["backgroundBottomColor"]) ?? ""
             let backgroundTopColor = RCTConvert.nsString(config["backgroundTopColor"]) ?? ""
             let stickerAsset = RCTConvert.nsurl(config["stickerAsset"])
             let attributionLink: String = RCTConvert.nsString(config["attributionLink"]) ?? ""
             
             var backgroundData: NSData? = nil
+            var backgroundVideo: NSData? = nil
             var stickerData:NSData? = nil
 
             if(backgroundAsset != nil){
@@ -102,6 +109,11 @@ class RNStoryShare: NSObject{
                                            options: NSData.ReadingOptions(rawValue: 0))
                 
                 backgroundData = UIImage(data: decodedData)!.pngData()! as NSData
+            }
+
+            if(backgroundVideo != nil){
+                backgroundVideo = try Data(contentsOf: backgroundVideo!,
+                                           options: NSData.ReadingOptions(rawValue: 0))
             }
             
             if(stickerAsset != nil){
@@ -112,6 +124,7 @@ class RNStoryShare: NSObject{
             }
 
             _shareToInstagram(backgroundData,
+                              backgroundVideo: backgroundVideo,
                               stickerData: stickerData,
                               attributionLink: attributionLink,
                               backgroundBottomColor: backgroundBottomColor,
