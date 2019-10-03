@@ -57,7 +57,7 @@ class RNStoryShare: NSObject{
                     pasteboardItems["com.instagram.sharedSticker.backgroundImage"] = backgroundData!
                 }
 
-                if(backgroundVideoAsset != nil){
+                if(backgroundVideo != nil){
                     pasteboardItems["com.instagram.sharedSticker.backgroundVideo"] = backgroundData!
                 }
 
