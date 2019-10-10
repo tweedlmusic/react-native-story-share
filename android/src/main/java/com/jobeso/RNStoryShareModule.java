@@ -47,6 +47,7 @@ public class RNStoryShareModule extends ReactContextBaseJavaModule {
   private static final String ERROR_NO_PERMISSIONS = "Permissions Missing";
   private static final String TYPE_ERROR = "Type Error";
   private static final String MEDIA_TYPE_IMAGE = "image/*";
+  private static final String MEDIA_TYPE_VIDEO = "video/*";
 
   private static final String instagramScheme = "com.instagram.android";
   private static final String snapchatScheme = "com.snapchat.android";
@@ -114,7 +115,7 @@ public class RNStoryShareModule extends ReactContextBaseJavaModule {
     return file;
   }
 
-  private static File getSavedImageFileForBase64(final String path, final String data) {
+  private static File getSavedMediaFileForBase64(final String path, final String data) {
     final byte[] imgBytesData = android.util.Base64.decode(data, android.util.Base64.DEFAULT);
     final File file = createFile(path);
     final FileOutputStream fileOutputStream;
@@ -142,11 +143,11 @@ public class RNStoryShareModule extends ReactContextBaseJavaModule {
     return file;
   }
 
-  private File getFileFromBase64String(String base64ImageData){
+  private File getFileFromBase64String(String base64AssetData){
     String backgroundAssetPath = getFilePath();
-    String data = base64ImageData.substring(base64ImageData.indexOf(",") + 1);
+    String data = base64AssetData.substring(base64AssetData.indexOf(",") + 1);
 
-    return getSavedImageFileForBase64(backgroundAssetPath, data);
+    return getSavedMediaFileForBase64(backgroundAssetPath, data);
   }
 
   private static void copyFile(File src, File dst) throws IOException {
@@ -168,7 +169,7 @@ public class RNStoryShareModule extends ReactContextBaseJavaModule {
     }
   }
 
-  private void _shareToInstagram(@Nullable File backgroundFile, @Nullable File stickerFile, @Nullable String attributionLink, @Nullable String backgroundBottomColor, @Nullable String backgroundTopColor, Promise promise){
+  private void _shareToInstagram(@Nullable File backgroundFile, @Nullable String backgroundContentType, @Nullable File stickerFile, @Nullable String attributionLink, @Nullable String backgroundBottomColor, @Nullable String backgroundTopColor, Promise promise){
     try {
       Intent intent = new Intent("com.instagram.share.ADD_TO_STORY");
       String providerName = this.getReactApplicationContext().getPackageName() + ".fileprovider";
@@ -176,8 +177,12 @@ public class RNStoryShareModule extends ReactContextBaseJavaModule {
 
       if(backgroundFile != null){
         Uri backgroundImageUri = FileProvider.getUriForFile(activity, providerName, backgroundFile);
-
-        intent.setDataAndType(backgroundImageUri, MEDIA_TYPE_IMAGE);
+        if(backgroundContentType.equals("video")){
+            intent.setDataAndType(backgroundImageUri, MEDIA_TYPE_VIDEO);
+        }
+        if(backgroundContentType.equals("image")){
+            intent.setDataAndType(backgroundImageUri, MEDIA_TYPE_IMAGE);
+        }
       } else {
         intent.setType(MEDIA_TYPE_IMAGE);
       }
@@ -232,11 +237,15 @@ public class RNStoryShareModule extends ReactContextBaseJavaModule {
 
       File backgroundFile = null;
       File stickerFile = null;
+      String backgroundContentType = null;
 
       switch(type){
         case BASE64: {
           if(backgroundAsset != null){
             backgroundFile = getFileFromBase64String(backgroundAsset);
+
+            String[] contentType = backgroundAsset.split("/");
+            backgroundContentType = contentType[0].split(":")[1];
 
             if(backgroundFile == null){
               throw new Error("Could not create file from Base64 in RNStoryShare");
@@ -279,7 +288,7 @@ public class RNStoryShareModule extends ReactContextBaseJavaModule {
         }
       }
 
-      _shareToInstagram(backgroundFile, stickerFile, attributionLink, backgroundBottomColor, backgroundTopColor, promise);
+      _shareToInstagram(backgroundFile, backgroundContentType, stickerFile, attributionLink, backgroundBottomColor, backgroundTopColor, promise);
     } catch (NullPointerException e){
       promise.reject(e.getMessage(), e);
     } catch (Exception e){
